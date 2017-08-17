@@ -75,32 +75,31 @@ Several pipelines can be run using `bcbio`.
 
 ### Germline variant calling
 * SNPs, indels and structural variants can be called for germline populations.
-* Evaluations are done against the Genome in a Bottle consortium and Illumina
-  Platinum Genomes project.
-    * Aligners: `bwa mem`, `novoalign`
-    * VarCallers: `FreeBayes`, `GATK HaplotypeCaller`, `Platypus`, `samtools`
-    * Can use hg38
 * Annotation with `snpEff` or `VEP`. `GEMINI` database prepared.
 
 #### Basic germline calling
-You can use the `FreeBayes` or the `GATK HaplotypeCaller` template.
-
+* You can use the `FreeBayes` or the `GATK HaplotypeCaller` template.
 * The `GATK` template follows best practices, including BQSR, local realignment
   and HaplotypeCaller variant calling.
+* You can enable SV calling.
+
 
 #### Population calling
 You can either use the joint calling or the batch calling method.
 The former calls samples independently, then combines them together into
-a single callset. Can work with `GATK HaplotypeCaller` or `FreeBayes`.
+a single callset. The latter calls all samples together, but obviously will
+have extremely large memory requirements for more than 100 samples.
+Can work with `GATK HaplotypeCaller` or `FreeBayes`.
 
 ### Cancer variant calling
 Summary:
-- tumor-only samples: filter out germline variants present in 1KG/ExAC and
-  not present in COSMIC. Likely germline variants are marked with a
-  `LowPriority` filter. Two variant outputs are generated:
+- _tumor-only_ samples: filter out likely germline variants present in
+  1KG/ExAC and not present in COSMIC.
+  Likely germline variants are marked with a `LowPriority` filter.
+  Two variant outputs are generated:
     - `sample-caller.vcf.gz` contains the somatic calls.
     - `sample-caller-germline.vcf.gz` contains likely germline mutations.
-- tumor + normal somatic samples: call somatic (tumor-specific) and germline
+- _tumor + normal_ samples: call somatic (tumor-specific) and germline
   (pre-existing) variants. For example you can use `VarDict` (somatic) and
   `FreeBayes` (germline).
 - The ensemble approach combines calls from multiple SNP and indel
