@@ -16,6 +16,17 @@ bcbio blog post notes
         * [Aligners](#aligners)
         * [Post-alignment process](#post-alignment-process)
         * [Varcallers](#varcallers)
+* [Updated Evaluation framework (2013-05-06)](#updated-evaluation-framework-2013-05-06)
+* [WGS trio varcall evaluation (2014-05-12)](#wgs-trio-varcall-evaluation-2014-05-12)
+    * [Method](#method-2)
+    * [Filters](#filters)
+        * [Low complexity regions](#low-complexity-regions)
+        * [High depth and low quality](#high-depth-and-low-quality)
+        * [GATK](#gatk)
+* [Cancer variant callers (2015-03-05)](#cancer-variant-callers-2015-03-05)
+    * [Problem](#problem-2)
+    * [Variant Callers](#variant-callers)
+    * [Tumor-only prioritisation](#tumor-only-prioritisation)
 
 <!-- vim-markdown-toc -->
 
@@ -124,3 +135,81 @@ Compare:
     * ug best at detecting SNPs
     * hc best at detecting indels
 
+Updated Evaluation framework (2013-05-06)
+---------------------------------
+* [Blog post](<https://bcbio.wordpress.com/2013/10/21/updated-comparison-of-variant-detection-methods-ensemble-freebayes-and-minimal-bam-preparation-pipelines/>)
+
+* FreeBayes detects more concordant SNPs and indels compared to GATK ug/hc
+* BQSR and indel realignment have little impact
+* The Ensemble calling method provides the best variant detection by combining
+  inputs from GATK ug, hc and FreeBayes
+
+WGS trio varcall evaluation (2014-05-12)
+---------------------------------
+* [Blog post](<https://bcbio.wordpress.com/2014/05/12/wgs-trio-variant-evaluation/>)
+
+### Method
+* Used NA12878/NA12891/NA12892 trio WGS 50x Illumina platinum genomes
+* Alignment with bwa mem, varcalls with FreeBayes/GATK hc
+* Evaluated calls using GIAB reference for NA12878
+
+### Filters
+
+#### Low complexity regions
+* LCRs cover 2% of the genome
+* Consist of locally repetitive genomic sections
+* LCRs contribute:
+    * 2% of SNPs
+    * 45% of indels
+* So: exclude LCRs in variant comparisons
+
+#### High depth and low quality
+* Reduce false positives with QUAL `<` 500 and DP `>` 208
+
+#### GATK
+* Overall VQSR provides good filtering
+* Hard filters are also ok
+
+Cancer variant callers (2015-03-05)
+---------------------------------
+* [Blog post](<https://bcbio.wordpress.com/2015/03/05/cancerval/>)
+
+### Problem
+* Cancer variant calling is challenging
+* Tumor samples have mixed cellularity (contaminating normal sample)
+* Multiple sub-clones with different somatic variants
+* Low-frequency sub-clonal variants are critical but hard to detect
+* Reference sets don't exist for cancer calling in public (e.g. NA12878 GIAB),
+  but:
+    * DREAM synthetic datasets exist with cellularity and multiple sub-clones
+    * DREAM real non-simulated data also exist
+    * ICGC, Bina
+
+
+* Use DREAM synthetic dataset 3 to evaluate tumor/normal varcalling
+* Ensemble callset generated with good sensitivity and precision
+
+### Variant Callers
+* MuTect (Broad)
+* VarDict (AstraZeneca)
+* FreeBayes (Eric Garrison - Marth lab)
+* VarScan (Dan Koboldt)
+* Scalpel (Schatz lab)
+* LUMPY (Ryan Layer - Quinlan lab)
+* DELLY (Tobias Rausch - EMBL)
+* WHAM (Zev Kronenberg - Yandell lab)
+
+* Ensemble method combines SNPs, indels and SVs
+    * Simplified approach performs well and faster than previous SVM approach
+
+### Tumor-only prioritisation
+* Sometimes there aren't matched normal samples for filtration
+    * E.g. FFPE samples and tumor cell lines
+
+* Prioritise likely tumor specific variants using publicly available resources:
+  COSMIC, ClinVar, 1KG, ESP, ExAC
+
+* High/medium impact, MAF `<` 1% in 1KG/ExAC, in COSMIC/ClinVar
+
+* Can't expect to filter private germline mutations that aren't in public
+  databases
