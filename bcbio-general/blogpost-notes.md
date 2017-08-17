@@ -1,6 +1,24 @@
 bcbio blog post notes
 =====================
 
+
+<!-- vim-markdown-toc GFM -->
+* [Ensemble method (2013-02-06)](#ensemble-method-2013-02-06)
+    * [Problem](#problem)
+    * [Method](#method)
+        * [Pipeline](#pipeline)
+        * [Combine and annotate](#combine-and-annotate)
+        * [Filter](#filter)
+    * [Results](#results)
+* [Evaluation framework (2013-05-06)](#evaluation-framework-2013-05-06)
+    * [Problem](#problem-1)
+    * [Method](#method-1)
+        * [Aligners](#aligners)
+        * [Post-alignment process](#post-alignment-process)
+        * [Varcallers](#varcallers)
+
+<!-- vim-markdown-toc -->
+
 Ensemble method (2013-02-06)
 ----------------------------
 
@@ -51,3 +69,58 @@ How can we treat these sets?
 ### Results
 Compare concordant and discordant variant calls between the two replicates. Use
 tools 1-5 as a baseline, then compare with ensemble approach.
+
+Evaluation framework (2013-05-06)
+---------------------------------
+* [Blog post](<https://bcbio.wordpress.com/2013/05/06/framework-for-evaluating-variant-detection-methods-comparison-of-aligners-and-callers/>)
+
+### Problem
+Relatively low concordance between variant calling methods. How can we evaluate
+variant calls?
+
+### Method
+Compare:
+* 2 aligners (bwa mem, novoalign)
+* 2 post-alignment prep methods (GATK, gkno)
+* 3 varcallers (GATK ug, GATK hc, FreeBayes)
+
+* Call variants on NA12878 exome from EdgeBio (evaluation variants)
+* Assess against NA12878 from GIAB (reference)
+
+* Discordant variants where reference and evaluation variants differ are:
+    * Extras: False positives (called in eval data but not in ref)
+    * Missing: False negatives (found in ref but not called in eval data)
+    * Shared: shared variants (found in ref and eval but represented
+      differently e.g. allele differences (hom/het), indel start/end diff etc.)
+
+* Take false positives and false negatives and subdivide using annotations from
+  GEMINI (low coverage (4-9 reads), repetitive (RepeatMasker), error prone
+  (motifs inducing seq errors))
+* Compare SNPs and indels separately.
+    * Indels have lower total counts but higher
+      error rates.
+* Distinguish between low coverage variants and actual diff in variant assessment
+* Evaluate only where coverage > 4.
+
+#### Aligners
+* novoalign vs. bwamem (GATK post-align processing + GATK ug varcaller)
+    * 1389 more concordant SNPs and 145 indels not seen with novoalign.
+        * 1024 of these in novoalign low coverage regions
+            * 941 of these had coverage `<` 10 with bwamem
+* bwamem equally as good as novoalign in calling, and faster
+
+#### Post-alignment process
+* GATK vs. gkno
+    * GATK: dedup picard, GATK BQSR, GATK indel realign
+    * gkno: dedup samtools, ogap indel realign. No BQSR.
+* GATK better than gkno:
+    * better SNP calling with BQSR
+    * 1% of SNPs missed due to poor quality calculations
+
+#### Varcallers
+* FreeBayes vs. GATK ug vs. GATK hc
+* Biggest impact on final set of variants
+* Highest difference of concordant SNPs between ug and hc.
+    * ug best at detecting SNPs
+    * hc best at detecting indels
+
