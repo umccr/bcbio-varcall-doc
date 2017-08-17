@@ -10,7 +10,10 @@ bcbio general notes
         * [Basic germline calling](#basic-germline-calling)
         * [Population calling](#population-calling)
     * [Cancer variant calling](#cancer-variant-calling)
+* [Running](#running)
 * [Project Structure](#project-structure)
+* [Configuration Notes](#configuration-notes)
+    * [Variant calling](#variant-calling)
 * [Miscellaneous](#miscellaneous)
 
 <!-- vim-markdown-toc -->
@@ -93,13 +96,13 @@ Can work with `GATK HaplotypeCaller` or `FreeBayes`.
 
 ### Cancer variant calling
 Summary:
-- _tumor-only_ samples: filter out likely germline variants present in
+- **tumor-only** samples: filter out likely germline variants present in
   1KG/ExAC and not present in COSMIC.
   Likely germline variants are marked with a `LowPriority` filter.
   Two variant outputs are generated:
     - `sample-caller.vcf.gz` contains the somatic calls.
     - `sample-caller-germline.vcf.gz` contains likely germline mutations.
-- _tumor + normal_ samples: call somatic (tumor-specific) and germline
+- **tumor + normal** samples: call somatic (tumor-specific) and germline
   (pre-existing) variants. For example you can use `VarDict` (somatic) and
   `FreeBayes` (germline).
 - The ensemble approach combines calls from multiple SNP and indel
@@ -119,6 +122,14 @@ ensemble:
 svcaller: [manta, cnvkit]
 ```
 
+Running
+-------
+Run analysis distributed across 8 local cores:
+
+```
+bcbio_nextgen.py bcbio_sample.yaml -n 8
+```
+
 Project Structure
 -----------------
 The structure of each project is generally recommended to be:
@@ -131,15 +142,41 @@ my-project/
         |-- log/
 ```
 
-* `config`: configuration files for input samples in here
-* `final`: output from pipeline in here
-* `work`: processing done here
+* `config`: configuration files for input samples
+* `final`: output from pipeline
+* `work`: processing
 * `log`: contains log files:
     * `bcbio-nextgen.log`: overview
     * `bcbio-nextgen-debug.log`: details
     * `bcbio-nextgen-commands.log`: full command lines used
 
+
+Configuration Notes
+-------------------
+
+You can create a sample configuration file with e.g.:
+
+```bash
+bcbio_nextgen.py -w template gatk-variant project1 sample1.bam sample2_1.fq sample2_2.fq
+```
+
+The different options that can be used are:
+
+* `fc_date`, `fc_name`: combined to form a prefix of intermediate files.
+* `upload`: which directory to put the output files.
+* `details`: list of sections, where each section describes a sample to process.
+* `description`: name of sample - used in final output.
+* `analysis`: which pipeline to run.
+* `algorithm`: tune the analysis pipeline.
+* `quality_format`: FASTQ quality.
+
+### Variant calling
+See [bcbio doc](https://bcbio-nextgen.readthedocs.io/en/latest/contents/configuration.html#variant-calling).
+The `variantcaller` option can take a list with multiple callers
+(`false`, freebayes, gatk-haplotype, haplotyper, platypus, mutect, mutect2,
+scalpel, tnhaplotyper, tnscope, vardict, varscan, samtools, gatk).
+
+
 Miscellaneous
 -------------
-* GIAB high-confidence set of reference calls: <http://arxiv.org/abs/1307.4661>
 * Installation directory on Spartan: `/data/projects/punim0010/local/share/bcbio`
