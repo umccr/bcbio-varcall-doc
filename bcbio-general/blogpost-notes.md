@@ -27,6 +27,10 @@ bcbio blog post notes
     * [Problem](#problem-2)
     * [Variant Callers](#variant-callers)
     * [Tumor-only prioritisation](#tumor-only-prioritisation)
+* [Filters for variant calls with VarDict (2016-04-04)](#filters-for-variant-calls-with-vardict-2016-04-04)
+    * [Problem](#problem-3)
+    * [Comparisons](#comparisons)
+    * [Filter](#filter-1)
 
 <!-- vim-markdown-toc -->
 
@@ -213,3 +217,47 @@ Cancer variant callers (2015-03-05)
 
 * Can't expect to filter private germline mutations that aren't in public
   databases
+
+Filters for variant calls with VarDict (2016-04-04)
+----------------------------------------------------
+* [Blog post](<http://bcb.io/2016/04/04/vardict-filtering/>)
+
+### Problem
+* We don't know about the work that goes into preparing a good variant filter.
+* No understanding by scientists who think that filtering is a solved problem.
+
+### Comparisons
+* Called variants on synthetic 4 dataset using VarDict and MuTect2
+* Used variant filters derived from synthetic 3 dataset analysis:
+    * VarDict `<` MuTect2
+* After adjusting filters (improved filtering of low frequency mutations):
+    * VarDict `=` MuTect.
+
+* two GIAB datasets NA12878 (s1) and NA24385 (s2)
+    * mixture as tumor and s2 as normal => identification of s1 as
+      somatic calls.
+    * mixture with 30% s1 and 70% s2 => exp AF of 15% for s1 hets not
+      in s2 and 30% for s1 homozygotes not in s2
+    * improvements carry over to this dataset
+
+### Filter
+* More lenient p-value (-P)
+    * Detection of many of the initially missing variants
+    * But poor precision
+
+* Low frequency (AF) with low depth (DP)
+    * 13x cov to accurately detect hets
+        * Het AF (0.5) and depth (13) => `AF x DP > 6`
+    * The variants that fail to meet this threshold are filtered based on one of
+      three other criteria for mapping quality (MQ), number of read mismatches
+      (NM), low depth (DP) or low quality (QUAL).
+
+Pseudocode:
+
+```
+((AF * DP < 6) &&
+((MQ < 55.0 && NM > 1.0) ||
+(MQ < 60.0 && NM > 2.0) ||
+(DP < 10) ||
+(QUAL < 45)))
+```
