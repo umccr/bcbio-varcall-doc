@@ -14,6 +14,7 @@ bcbio general notes
 * [Project Structure](#project-structure)
 * [Configuration Notes](#configuration-notes)
     * [Variant calling](#variant-calling)
+* [Code](#code)
 * [Miscellaneous](#miscellaneous)
 
 <!-- vim-markdown-toc -->
@@ -172,9 +173,19 @@ The different options that can be used are:
 
 ### Variant calling
 See [bcbio doc](https://bcbio-nextgen.readthedocs.io/en/latest/contents/configuration.html#variant-calling).
+
 The `variantcaller` option can take a list with multiple callers
 (`false`, freebayes, gatk-haplotype, haplotyper, platypus, mutect, mutect2,
 scalpel, tnhaplotyper, tnscope, vardict, varscan, samtools, gatk).
+
+Code
+-----
+See [bcbio doc](https://bcbio-nextgen.readthedocs.io/en/latest/contents/code.html).
+
+The following two directories contain code of most interest for getting started:
+
+* `bcbio-nextgen/bcbio/pipeline`, starting from `main.py`
+* `bcbio-nextgen/bcbio/variation`
 
 
 Miscellaneous
