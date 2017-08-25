@@ -1,0 +1,5 @@
+bam_dir: "../../data/bam"
+out_dir: "../../data/bam"
+log_dir: "../../data/log"
+subset_chrom: 21
+samples: ["control_100x-ready", "tumor_100x-ready"]

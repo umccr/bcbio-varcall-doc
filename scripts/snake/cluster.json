@@ -1,0 +1,13 @@
+{
+    "__default__" :
+    {
+        "time": "00:30:00",
+        "n": 1,
+        "partition": "vccc",
+        "mem": 20000
+    },
+    "subset_bam":
+    {
+        "time": "00:30:00"
+    }
+}
