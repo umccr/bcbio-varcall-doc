@@ -24,13 +24,13 @@ Installation
 
 First download the install script:
 
-```bash
+```
 wget https://raw.github.com/chapmanb/bcbio-nextgen/master/scripts/bcbio_nextgen_install.py
 ```
 
 Then run it:
 
-```bash
+```
 python bcbio_nextgen_install.py \
   /usr/local/share/bcbio \
   --tooldir=/usr/local \
@@ -51,7 +51,7 @@ Upgrade
 -------
 You can upgrade the code, tools and data with:
 
-```bash
+```
 bcbio_nextgen.py upgrade -u stable --tools --data
 ```
 
@@ -125,6 +125,8 @@ svcaller: [manta, cnvkit]
 
 Running
 -------
+
+Output from `bcbio_nextgen.py -h`:
 
 ```
 usage: bcbio_nextgen.py [-h] [-n NUMCORES] [-t {local,ipython}]
@@ -200,11 +202,35 @@ Configuration Notes
 
 You can create a sample configuration file with e.g.:
 
-```bash
-bcbio_nextgen.py -w template gatk-variant project1 sample1.bam sample2_1.fq sample2_2.fq
+```
+bcbio_nextgen.py -w template gatk-variant project1.csv sample1.bam sample2_1.fq sample2_2.fq
 ```
 
-The different options that can be used are:
+where:
+
+* -w template: generate a template
+* `gatk-variant`: name of yaml in `bcbio-nextgen/config/templates` or path
+  to custom file.
+* `project1.csv`: file with sample/algorithm metadata
+* `bam`/`fq`: input `BAM`/`FASTQ` files.
+
+**OR**
+
+You can also do the above in a more simple manner:
+
+```
+bcbio_nextgen.py -w template tumor-paired project1
+```
+
+which outputs:
+
+```
+Template configuration file created at: ./proj1/config/proj1-template.yaml
+Edit to finalize custom options, then prepare full sample config with:
+bcbio_nextgen.py -w template ./proj1/config/proj1-template.yaml proj1 sample1.bam sample2.fq
+```
+
+The different options in the configuration file that can be used are:
 
 * `fc_date`, `fc_name`: combined to form a prefix of intermediate files.
 * `upload`: which directory to put the output files.
