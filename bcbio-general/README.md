@@ -230,15 +230,49 @@ Edit to finalize custom options, then prepare full sample config with:
 bcbio_nextgen.py -w template ./proj1/config/proj1-template.yaml proj1 sample1.bam sample2.fq
 ```
 
-The different options in the configuration file that can be used are:
+Here's a sample configuration example:
 
-* `fc_date`, `fc_name`: combined to form a prefix of intermediate files.
-* `upload`: which directory to put the output files.
+```
+details:
+  - analysis: variant2
+    lane: 1
+    description: Example1
+    files: [in_pair_1.fq, in_pair_2.fq]
+    genome_build: hg19
+    algorithm:
+      platform: illumina
+    metadata:
+      batch: Batch1
+      sex: female
+      platform_unit: flowcell-barcode.lane
+      library: library_type
+```
+
+The different options that can be used are:
+
 * `details`: list of sections, where each section describes a sample to process.
-* `description`: name of sample - used in final output.
-* `analysis`: which pipeline to run.
-* `algorithm`: tune the analysis pipeline.
+* `analysis`: which pipeline to run (variant2, RNA-seq etc.)
+* `lane`: unique number within project. `ID` in BAM read group.
+* `description`: name of sample - used in final output. `SM` in BAM read group.
+* `files`: list of files to process. Can be two paired-end FASTQ or single BAM.
+* `genome_build`: hg19 etc.
+* `algorithm`: tune the analysis pipeline, based on options below.
+* `platform`: sequencing platform used. `PL` in BAM read group (default: Illumina).
+* `metadata`: additional descriptive metadata about the sample:
+    - `batch`: group used for combining different samples together
+    - `sex`: male/female or 1/2.
+    - `phenotype`: cancer samples specified with "tumor"/"normal"; case/controls
+      as "affected"/"unaffected".
+    - `svclass`: for SV case/control setups.
+    - `ped`: GEMINI uses this.
+    - `platform_unit`, `library`, `validate_batch`: additional metadata.
+* `upload`: which directory to put the output files.
+* `fc_date`, `fc_name`: combined to form a prefix of intermediate files.
 * `quality_format`: FASTQ quality.
+* `aligner`: [bwa, bowtie, bowtie2, hisat2, novoalign, snap, star, tophat2, false].
+   Use `false` if you have pre-aligned BAM files.
+* `bam_clean`: clean BAM when skipping alignment.
+* `bam_sort`: sort BAM when skipping alignment (coordinate or queryname).
 
 ### Variant calling
 See [bcbio doc](https://bcbio-nextgen.readthedocs.io/en/latest/contents/configuration.html#variant-calling).
