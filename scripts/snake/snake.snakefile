@@ -1,6 +1,5 @@
 configfile: 'config.yaml'
 shell.prefix("set -euo pipefail; ")
-#shell.prefix("source activate snake; ")
 
 rule all:
     input:
