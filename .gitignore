@@ -1,0 +1,7 @@
+data
+.snakemake
+
+# bcbio stuff
+scripts/bcbio/2017-08-28_cancer-normal/work/*
+!scripts/bcbio/2017-08-28_cancer-normal/work/run_bcbio.sh
+final/
