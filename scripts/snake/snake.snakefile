@@ -3,7 +3,7 @@ shell.prefix("set -euo pipefail; ")
 
 rule all:
     input:
-        expand('{bam_dir}/{sample}_chr{chrom}.bam.bai',
+        expand('{bam_dir}/{sample}_chr{chrom}_2pc.bam',
                bam_dir = config['out_dir'],
                sample = config['samples'],
                chrom = config['subset_chrom'])
@@ -30,3 +30,16 @@ rule index_bam:
     shell:
         "samtools index {input} {output} 2> {log}"
 
+rule sample_sam:
+    input:
+        config['out_dir'] + '{sample}_chr{subset_chrom}.bam'
+    output:
+        config['out_dir'] + '{sample}_chr{subset_chrom}_2pc.bam'
+    log:
+        config['log_dir'] + '{sample}_chr{subset_chrom}_2pc.bam.log'
+    threads:
+        1
+    params:
+        seed = 123.02
+    shell:
+        "samtools view -b -s {params.seed} {input} > {output} 2> {log}"
