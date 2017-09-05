@@ -39,7 +39,18 @@ __chunk1__
     * `target_regions.bed`: target regions in `BED` format. bcbio splits
       chr into chunks so e.g. for chr21 there were three separate commands run
       with _nearly_ contiguous `BED` coordinates (based on file names).
-    * output has one set of columns for each of the two samples.
+    * output has one set of columns for each of the two samples. Need to check
+      the Perl script for what each column is exactly, but roughly:
+        * Total of 51 columns
+        * Cols 1-7: sample, gene, chr, start, end, ref, alt
+        * Cols 8-13: For Sample 1: depth-tot, depth-totalt, depth-fwdref, depth-revref,
+          depth-fwdalt, depth-revalt
+        * Col 14-25: For Sample 1: genotype, AF, bias, pmean, pstd, qual, qstd, mapq, sn, hiaf, adjaf, nm
+        * Col 26-31: For Sample 2: depth-tot, depth-totalt, depth-fwdref, depth-revref,
+          depth-fwdalt, depth-revalt
+        * Col 32-43: For Sample 2: genotype, AF, bias, pmean, pstd, qual, qstd, mapq, sn, hiaf, adjaf, nm
+        * Col 44-51: shift3, msi, msilen, left-flank-seq, right-flank-seq, segment, status, type
+
 * Pipe the output into...
 
 ```
@@ -47,10 +58,19 @@ __chunk1__
 ```
 
 __chunk2__
-* `testsomatic.R` "performs a statistical test for strand bias"
 
-
+* "Performs a statistical test for strand bias"
+* Runs a Fisher's exact test four times for each input row:
+    1. Use columns 10-13 for counts. Keep pvalues1 and oddratio1.
+    2. Use columns 28-31 for counts. Keep pvalues2 and oddratio2.
+    3. Use columns 9, tref, 27 and rref for counts (greater)
+    4. Use columns 9, tref, 27 and rref for counts (less)
+* Keep the smaller pvalue from the greater/less test in pvalues, and the odds
+  ratio in oddratio.
+* Insert the final columns into the input data frame:
+    * d[, 1:25], pvalues1, oddratio1, d[, 26:43], pvalues2, oddratio2, d[, 44:dim(d)[2]], pvalues, oddratio
 * Pipe the output into...
+
 ```
 | var2vcf_paired.pl
 -P 0.9
@@ -61,6 +81,25 @@ __chunk2__
 ```
 
 __chunk3__
+
+* Run `var2vcf_paired.pl` with following options:
+    * `-P 0.9`:  maximum p-value
+    * `-m 4.25`: max mean mismatches allowed
+    * `-f 0.1`: minimum AF
+    * `-M`: output only candidate somatic
+    * `-N "tumor_downsample|control_downsample"`: sample names.
+* Create a hash where key is the chromosome, value is a hash where key is the
+  start position, value is an array of arrays, each containing a single row from
+  the previous data.frame.
+* Print a VCF header, followed by column names.
+* Foreach chromosome in the hash keys:
+    * Foreach position in the position keys:
+        * tmp is the array of allele frequencies
+
+
+
+
+
 
 * chunk4
 ```
