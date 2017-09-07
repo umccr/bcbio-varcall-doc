@@ -17,7 +17,7 @@ vardict-java
 /data/projects/punim0010/projects/Diakumis_bcbio_varcall_doc/git/scripts/bcbio/2017-08-28_cancer-normal/work/vardict/21/batch1-21_19329108_42402896-regions-regionlimit.bed
 ```
 
-__chunk1__
+### chunk1
 
 * Specify min/max mem and tmp dir in `work/bcbiotx/`
 * Run vardict-java with below options:
@@ -39,8 +39,6 @@ __chunk1__
     * `target_regions.bed`: target regions in `BED` format. bcbio splits
       chr into chunks so e.g. for chr21 there were three separate commands run
       with _nearly_ contiguous `BED` coordinates (based on file names).
-    * output has one set of columns for each of the two samples. Need to check
-      the Perl script for what each column is exactly, but roughly:
         * Total of 51 columns
         * Cols 1-7: sample, gene, chr, start, end, ref, alt
         * Cols 8-13: For Sample 1: depth-tot, depth-totalt, depth-fwdref, depth-revref,
@@ -57,7 +55,7 @@ __chunk1__
 | testsomatic.R
 ```
 
-__chunk2__
+### chunk2
 
 * "Performs a statistical test for strand bias"
 * Runs a Fisher's exact test four times for each input row:
@@ -80,7 +78,7 @@ __chunk2__
 -N "tumor_downsample|control_downsample"
 ```
 
-__chunk3__
+### chunk3
 
 * Run `var2vcf_paired.pl` with following options:
     * `-P 0.9`:  maximum p-value
@@ -88,20 +86,101 @@ __chunk3__
     * `-f 0.1`: minimum AF
     * `-M`: output only candidate somatic
     * `-N "tumor_downsample|control_downsample"`: sample names.
-* Create a hash where key is the chromosome, value is a hash where key is the
+* Create  `%hash` where key is the chromosome, value is a hash where key is the
   start position, value is an array of arrays, each containing a single row from
-  the previous data.frame.
+  the previous dataframe. Example:
+
+```
+%hash = {
+  '21' => {
+    '12345' => [
+                 [
+                  'tumor_downsample', '21', '21', '12345', '12345',
+                  'A', 'C', '2', '2', '0', '0', '1', '1', 'C/C', '1', ...
+                  ]
+                ],
+    '12567' => [
+                 [
+                  'tumor_downsample', '21', '21', '12567', '12567',
+                  'G', 'T', '4', '4', '0', '0', '1', '3', 'T/T', '1', ...
+                  ]
+                ],
+```
+
+* `@chrs` contains all the keys of `%hash`.
 * Print a VCF header, followed by column names.
 * Foreach chromosome in the hash keys:
     * Foreach position in the position keys:
-        * tmp is the array of allele frequencies
+        * tmp is the array/row of each position
+            * loop over each position. Description of fields:
+
+| Field        | Description |
+|--------------|-------------|
+| `$sample`    | Sample name |
+| `$gene`      | Gene |
+| `$chrt`      | Chromosome |
+| `$start`     | Start Pos |
+| `$end`       | End Pos |
+| `$ref`       | Ref base |
+| `$alt`       | Alt base |
+| `$dpX`       | Total depth of coverage (for sample X) |
+| `$vdX`       | Variant depth of coverage |
+| `$rfwdX`     | Depth fwd ref |
+| `$rrevX`     | Depth rev ref |
+| `$vfwdX`     | Depth fwd alt |
+| `$vrevX`     | Depth rev alt |
+| `$gtX`       | Genotype |
+| `$afX`       | Allele frequency |
+| `$biasX`     | Strand bias |
+| `$pmeanX`    | Mean position in reads |
+| `$pstdX`     | Position STD in reads |
+| `$qualX`     | Mean quality score in reads |
+| `$qstdX`     | Quality score STD in reads |
+| `$mapqX`     | Mapping quality |
+| `$snX`       | Signal to noise |
+| `$hiafX`     | AF using only high-quality bases |
+| `$adjafX`    | Adj AF for indels due to local realignment |
+| `$nmX`       | Mean mismatches in reads |
+| `$sbfX`      | Strand bias Fisher p-value |
+| `$oddratioX` | Strand bias Odds Ratio |
+| `$shift3`    | No. of bases to be shifted to 3' for dels due to alternative alignment |
+| `$msi`       | Microsatellite. If greater than 1 indicates Microsatellite Instability (MSI) |
+| `$msilen`    | MSI unit repeat length in bp |
+| `$lseq`      | 5' flanking sequence |
+| `$rseq`      | 3' flanking sequence |
+| `$seg`       | Segment |
+| `$status`    | Somatic or germline status |
+| `$type`      | Variant type (SNV, Insertion, Deletion, Complex) |
+| `$pvalue`    | p-value |
+| `$oddratio`  | Odds Ratio |
+
+* Create two arrays `@filters` and `@filters2`, pushing into them info based on
+  the value of the above fields for sample 1 and 2.
+* Info checked:
+    * mindepth1, minvardepth1 unless the status is strongsomatic etc.
+    * mindepth2, minvardepth2
+    * af1, pmean1, pstd1, qual1, mapq1, sn1, nm1, bias1
+    * af2, pmean2, pstd2, qual2, mapq2, sn2, nm2, bias2
+    * msi, bias
+    * if the `-M` option was used, push pvalue etc.
+* If there have been any filters pushed into `@filters`, join them into a
+  `;`-separated string. Else, use `PASS`. Assign result to `$filter`.
+* If the `-M` option was used, `PASS` the variant if it's good in the germline
+  sample (`@filters2` = 0).
+* Assign the genotype for both samples after comparing the allele frequencies:
+    * the default `$GTFREQ` is 0.2
+    * the default `$FREQ` (AF) is 0.02 (bcbio uses 0.1)
+    * if 1-afX < GTFREQ => `1/1`, else
+    * if afX >= 0.5 => `1/0`, else
+    * if afX >= FREQ => `0/1`, else `0/0`
+* Print pinfo1, pfilter and pinfo2
 
 
 
 
 
+### chunk4
 
-* chunk4
 ```
 | /data/projects/punim0010/local/share/bcbio/anaconda/bin/py -x
 'bcbio.variation.vcfutils.add_contig_to_header(x, "/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa")'
