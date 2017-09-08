@@ -55,6 +55,7 @@ vardict-java
     * `target_regions.bed`: target regions in `BED` format. bcbio splits
       chr into chunks so e.g. for chr21 there were three separate commands run
       with _nearly_ contiguous `BED` coordinates (based on file names).
+    * Output:
         * Total of 51 columns
         * Cols 1-7: sample, gene, chr, start, end, ref, alt
         * Cols 8-13: For Sample 1: depth-tot, depth-totalt, depth-fwdref, depth-revref,
