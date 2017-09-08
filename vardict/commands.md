@@ -1,5 +1,23 @@
 The commands run by bcbio when using `VarDict` as the variant caller can be
-found in the `bcbio-nextgen-commands.log` log file:
+found in the `bcbio-nextgen-commands.log` log file. In summary:
+
+<!-- vim-markdown-toc GFM -->
+* [vardict-java](#vardict-java)
+* [testsomatic](#testsomatic)
+* [var2vcf](#var2vcf)
+* [add-contig](#add-contig)
+* [bcftools filter1](#bcftools-filter1)
+* [depth-freq-filter](#depth-freq-filter)
+* [bcftools filter2](#bcftools-filter2)
+* [seds](#seds)
+* [freebayes-call-somatic](#freebayes-call-somatic)
+* [awks](#awks)
+* [vcfstreamsort](#vcfstreamsort)
+* [bgzip](#bgzip)
+
+<!-- vim-markdown-toc -->
+
+### vardict-java
 
 ```
 export VAR_DICT_OPTS='-Xms750m -Xmx3500m -XX:+UseSerialGC -Djava.io.tmpdir=/data/projects/punim0010/projects/Diakumis_bcbio_varcall_doc/git/scripts/bcbio/2017-08-28_cancer-normal/work/bcbiotx/tmpyVERSl' &&
@@ -16,8 +34,6 @@ vardict-java
 -F 0x700
 /data/projects/punim0010/projects/Diakumis_bcbio_varcall_doc/git/scripts/bcbio/2017-08-28_cancer-normal/work/vardict/21/batch1-21_19329108_42402896-regions-regionlimit.bed
 ```
-
-### chunk1
 
 * Specify min/max mem and tmp dir in `work/bcbiotx/`
 * Run vardict-java with below options:
@@ -51,11 +67,11 @@ vardict-java
 
 * Pipe the output into...
 
+### testsomatic
+
 ```
 | testsomatic.R
 ```
-
-### chunk2
 
 * "Performs a statistical test for strand bias"
 * Runs a Fisher's exact test four times for each input row:
@@ -69,6 +85,8 @@ vardict-java
     * d[, 1:25], pvalues1, oddratio1, d[, 26:43], pvalues2, oddratio2, d[, 44:dim(d)[2]], pvalues, oddratio
 * Pipe the output into...
 
+### var2vcf
+
 ```
 | var2vcf_paired.pl
 -P 0.9
@@ -77,8 +95,6 @@ vardict-java
 -M
 -N "tumor_downsample|control_downsample"
 ```
-
-### chunk3
 
 * Run `var2vcf_paired.pl` with following options:
     * `-P 0.9`:  maximum p-value
@@ -134,9 +150,9 @@ vardict-java
 | `$biasX`     | Strand bias |
 | `$pmeanX`    | Mean position in reads |
 | `$pstdX`     | Position STD in reads |
-| `$qualX`     | Mean quality score in reads |
-| `$qstdX`     | Quality score STD in reads |
-| `$mapqX`     | Mapping quality |
+| `$qualX`     | Mean of the base (Phred) qualities of the bases for the variant |
+| `$qstdX`     | Standard deviation as above |
+| `$mapqX`     | Mapping quality (mean of mapping qualities of reads supporting variants |
 | `$snX`       | Signal to noise |
 | `$hiafX`     | AF using only high-quality bases |
 | `$adjafX`    | Adj AF for indels due to local realignment |
@@ -174,55 +190,121 @@ vardict-java
     * if afX >= 0.5 => `1/0`, else
     * if afX >= FREQ => `0/1`, else `0/0`
 * Print pinfo1, pfilter and pinfo2
+* Pipe the output vcf into...
 
-
-
-
-
-### chunk4
+### add-contig
 
 ```
 | /data/projects/punim0010/local/share/bcbio/anaconda/bin/py -x
 'bcbio.variation.vcfutils.add_contig_to_header(x, "/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa")'
 ```
 
-* chunk5
+* Runs the `add_contig_to_header` function in `bcbio-nextgen/bcbio/variation/vcfutils.py`
+* The `file_contigs` function that is called is in `bcbio-nextgen/bcbio/bam/ref.py`
+* Pipe output into...
+
+### bcftools filter1
+
 ```
 | bcftools filter -m '+' -s 'REJECT' -e 'STATUS !~ ".*Somatic"' 2> /dev/null
 ```
 
-* chunk6
+* Run `bcftools filter` with following options:
+    * `-m '+'`: append new FILTER strings (i.e. don't replace them)
+    * `-s 'REJECT'`: annotate FILTER column with 'REJECT'
+    * `-e EXPRESSION`: exclude sites for which EXPRESSION is true. So filter out
+      sites where STATUS does not contain the 'Somatic' string.
+* Pipe output into...
+
+### depth-freq-filter
+
 ```
 | /data/projects/punim0010/local/share/bcbio/anaconda/bin/py -x
 'bcbio.variation.vardict.depth_freq_filter(x, 0, "False")'
 ```
+
+Runs the `depth_freq_filter` function in
+`bcbio-nextgen/bcbio/variation/vardict.py`:
+
+* First add two FILTER headers to the vcf file (above the column header line)
+* Then if the variant doesn't pass several filters, append the appropriate flag
+  to the FILTER column, or replace if already was '.' or 'PASS' (read code for
+  what filters are specified).
+* Pipe output into...
+
+### bcftools filter2
+
 ```
 | bcftools filter -i 'QUAL >= 0'
 ```
+
+* Include only sites with non-negative QUAL
+
+### seds
+
 ```
 | sed 's/\\.*Somatic\\/Somatic/'
 ```
+
+* Get a clean 'somatic' status
+
 ```
 | sed 's/REJECT,Description=".*">/REJECT,Description="Not Somatic via VarDict">/'
 ```
+
+* Clean up FILTER row for REJECT ID
+
+### freebayes-call-somatic
+
 ```
 | /data/projects/punim0010/local/share/bcbio/anaconda/bin/python -c
 'from bcbio.variation import freebayes; freebayes.call_somatic("tumor_downsample", "control_downsample")' 
 ```
+
+* For VarDict I believe it simply checks the AF of the tumor compared to the
+  normal based on a threshold. If there is supporting evidence, adds 'SOMATIC'
+  to the INFO column. Else, adds 'REJECT' to the FILTER column.
+* Pipe output into...
+
+### awks
+
 ```
 | awk -F$'\t' -v OFS='\t' '{if ($0 !~ /^#/) gsub(/[KMRYSWBVHDXkmryswbvhdx]/, "N", $4) } {print}'
 ```
+
+* Cleans up Ref column
+
 ```
 | awk -F$'\t' -v OFS='\t' '{if ($0 !~ /^#/) gsub(/[KMRYSWBVHDXkmryswbvhdx]/, "N", $5) } {print}'
 ```
+
+* Cleans up Alt column
+
 ```
 | awk -F$'\t' -v OFS='\t' '$1!~/^#/ && $4 == $5 {next} {print}'
 ```
+
+* I *think* above filters out rows where Ref and Alt are the same.
+
+* Pipe output into...
+
+### vcfstreamsort
+
 ```
 | /data/projects/punim0010/local/share/bcbio/anaconda/bin/vcfstreamsort
 ```
+
+* Part of `vcflib`. Reads VCF on stdin and guarantees that the positional order
+  is correct provided out-of-order variants are no more than 100 positions in
+  the VCF file apart.
+* Pipe output into...
+
+### bgzip
+
 ```
 | bgzip -c >
 /data/projects/punim0010/projects/Diakumis_bcbio_varcall_doc/git/scripts/bcbio/2017-08-28_cancer-normal/work/bcbiotx/tmpyVERSl/batch1-21_19329108_42402896-raw.vcf.gz
 ```
+
+* bgzips final vcf file
 
