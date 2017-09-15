@@ -1,11 +1,11 @@
-The commands run by bcbio when using `X` as the variant caller can be
+The commands run by bcbio when using `MuTect2` as the variant caller can be
 found in the `bcbio-nextgen-commands.log` log file. In summary (from
 [docs](https://github.com/broadinstitute/gatk/tree/master/docs/mutect)):
 
-Mutect2 emits candidate variants with a set of annotations. After that
-FilterMutectCalls produces filtered calls by subjecting these variants to a
-series of hard filters that reject sites if some annotation is out of an
-allowable range.
+  > Mutect2 emits candidate variants with a set of annotations. After that
+    FilterMutectCalls produces filtered calls by subjecting these variants to a
+    series of hard filters that reject sites if some annotation is out of an
+    allowable range.
 
 More info
 [here](https://software.broadinstitute.org/gatk/gatkdocs/4.beta.1/org_broadinstitute_hellbender_tools_walkers_mutect_Mutect2.php).
@@ -135,6 +135,8 @@ FilterMutectCalls \
 * Source code in GATK
 [GitHub repo](https://github.com/broadinstitute/gatk/blob/master/src/main/java/org/broadinstitute/hellbender/tools/walkers/mutect/FilterMutectCalls.java)
 
+### Filters
+
 * `tumor_lod`: minimum likelihood of an allele as determined by the somatic
   likelihoods model required to pass.
 * `maxEventsInHaplotype`: the maximum allowable number of called variants
@@ -164,7 +166,7 @@ FilterMutectCalls \
   real variants that also have significant strand bias, i.e. a true
   variant that _also_ has some artifactual reads.
 * `minMedianBaseQuality`: the minimum median base quality of bases supporting a SNV.
-* `minMedianMappingQuality: the minimum median mapping quality of reads supporting an allele.
+* `minMedianMappingQuality`: the minimum median mapping quality of reads supporting an allele.
 * `maxMedianFragmentLengthDifference`: the maximum difference between the median fragment
   lengths reads supporting alt and reference alleles. Note that fragment
   length is based on where paired reads are mapped, not the actual physical fragment length.
