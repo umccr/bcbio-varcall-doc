@@ -1,0 +1,41 @@
+details:
+  - analysis: variant2
+    genome_build: GRCh37
+    description: control_downsample
+    metadata:
+       batch: batch1
+       phenotype: normal
+    algorithm:
+      aligner: false
+      mark_duplicates: true
+      recalibrate: false
+      realign: false
+      maxcov_downsample: false
+      variantcaller:
+      - mutect2
+      tools_on: [gatk4]
+      tools_off: [gemini]
+      indelcaller: false
+    files:
+        - /data/cephfs/punim0010/data/Hofmann_Reference/ICGC_MB/control_100x-ready_chr21.bam
+  - analysis: variant2
+    genome_build: GRCh37
+    description: tumor_downsample
+    metadata:
+       batch: batch1
+       phenotype: tumor
+    algorithm:
+      aligner: false
+      mark_duplicates: true
+      recalibrate: false
+      realign: false
+      maxcov_downsample: false
+      variantcaller:
+      - mutect2
+      tools_on: [gatk4]
+      tools_off: [gemini]
+      indelcaller: false
+    files:
+        - /data/cephfs/punim0010/data/Hofmann_Reference/ICGC_MB/tumor_100x-ready_chr21.bam
+upload:
+      dir: ../final
