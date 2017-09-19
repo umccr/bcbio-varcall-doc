@@ -6,6 +6,8 @@ scripts/bcbio/2017-08-28_cancer-normal/work/*
 !scripts/bcbio/2017-08-28_cancer-normal/work/run_bcbio.sh
 scripts/bcbio/2017-09-11_cancer-normal/work/*
 !scripts/bcbio/2017-09-11_cancer-normal/work/run_bcbio.sh
+scripts/bcbio/2017-09-19_cancer-normal/work/*
+!scripts/bcbio/2017-09-19_cancer-normal/work/run_bcbio.sh
 final/
 
 .DS_Store

@@ -2,7 +2,7 @@
 #SBATCH -n 1
 #SBATCH -p vccc
 #SBATCH --mem=8000
-#SBATCH --time=240:00:00
+#SBATCH --time=24:00:00
 #SBATCH -o log.nortum_varscan.out
 #SBATCH -e log.nortum_varscan.err
 #SBATCH --mail-type=ALL
@@ -14,6 +14,6 @@ bcbio_nextgen.py \
     -q vccc \
     -s slurm \
     -t ipython \
-    -r 'timelimit=5-00:00:00' \
+    -r 'timelimit=1-00:00:00' \
     --retries 1 \
     --timeout 120
