@@ -1,33 +1,7 @@
 The commands run by bcbio when using `VarScan` as the variant caller can be
 found in the `bcbio-nextgen-commands.log` log file. In summary:
 
-### command1
-
-```
-```
-
-* Run foo with below options:
-    * `-A`: foo
-    * `-B`: foo
-
-* Pipe the output into...
-
-### command2
-
-```
-| foo
-```
-
-* Bla
-* Pipe the output into...
-
-### command3
-
-```
-| foo
-```
-
-* Bla
+## varscan
 ```
 varscan \
   -Xms681m -Xmx3181m \
@@ -36,6 +10,13 @@ varscan \
   -XX:+UseSerialGC \
 -Djava.io.tmpdir=work/bcbiotx/tmpuV45Kf \
 somatic
+```
+
+* argument is the read output from...
+
+## samtools1
+
+```
 <(
 samtools mpileup \
   -f GRCh37.fa \
@@ -45,6 +26,13 @@ samtools mpileup \
   work/prealign/control_downsample/control_100x-ready_chr21-dedup.bam \
   | { ifne grep -v -P '\t0\t\t$' || true; }
   )
+```
+
+* argument is the read output from...
+
+## samtools2
+
+```
 <(
 samtools mpileup \
   -f GRCh37.fa \
@@ -54,6 +42,11 @@ samtools mpileup \
   work/prealign/tumor_downsample/tumor_100x-ready_chr21-dedup.bam \
   | { ifne grep -v -P '\t0\t\t$' || true; }
   ) \
+```
+
+## varscan additional args
+
+```
   --output-snp work/bcbiotx/tmpYw7los/batch1-21_19329108_42402896-snp.vcf \
   --output-indel work/bcbiotx/tmpYw7los/batch1-21_19329108_42402896-indel.vcf \
   --output-vcf \
@@ -62,6 +55,8 @@ samtools mpileup \
   --strand-filter 1 \
   --min-var-freq 0.1
 ```
+
+## varscan fix snps
 
 ```
 cat work/bcbiotx/tmpWTXUUy/batch1-21_19329108_42402896-snp.vcf \
@@ -80,8 +75,11 @@ cat work/bcbiotx/tmpWTXUUy/batch1-21_19329108_42402896-snp.vcf \
     | /data/projects/punim0010/local/share/bcbio/anaconda/bin/py -x \
     'bcbio.variation.varscan.spv_freq_filter(x, 1)' \
     | bgzip -c > work/bcbiotx/tmpqwbclp/batch1-21_19329108_42402896-snp-fix.vcf.gz
+```
 
+## varscan fix indels
 
+```
 cat work/bcbiotx/tmpWTXUUy/batch1-21_19329108_42402896-indel.vcf \
   | /data/projects/punim0010/local/share/bcbio/anaconda/bin/py -x \
   'bcbio.variation.varscan.fix_varscan_output(x, "control_downsample", "tumor_downsample")' \
@@ -97,7 +95,11 @@ cat work/bcbiotx/tmpWTXUUy/batch1-21_19329108_42402896-indel.vcf \
   | /data/projects/punim0010/local/share/bcbio/anaconda/bin/py -x \
   'bcbio.variation.varscan.spv_freq_filter(x, 1)' \
   | bgzip -c > work/bcbiotx/tmpIJ1Wc3/batch1-21_19329108_42402896-indel-fix.vcf.gz
+```
 
+## tabix
+
+```
 tabix -f -p vcf work/bcbiotx/tmpb4NtZh/batch1-21_19329108_42402896-snp-fix.vcf.gz
 tabix -f -p vcf work/bcbiotx/tmp0SPSvI/batch1-21_19329108_42402896-indel-fix.vcf.gz
 ```
