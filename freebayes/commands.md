@@ -46,7 +46,6 @@ freebayes \
   * `--allele-balance-priors-off`: Disable use of aggregate probability of
     observation balance between alleles as a component of the priors.
   * `tumor.bam control.bam`: `BAM` files to be analysed
-```
 
 ### bcftools filter
 
