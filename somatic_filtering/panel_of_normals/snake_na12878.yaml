@@ -1,0 +1,15 @@
+samples:
+    1VD: 1VD/na12878_2.vcf.gz
+    2VD: 2VD/na12878_3.vcf.gz
+    3VD: 3VD/na12878_3VD.vcf.gz
+    4KC: 4KC/na12878_4KC.vcf.gz
+    PG: PG/na12878_1.vcf.gz
+
+normals_dir: /home/vlad/validation/normals/*.vcf.gz
+
+hits_threholds: 1, 2
+
+rtgeval: run-eval
+rtg_db: /home/vlad/bcbio/genomes/Hsapiens/GRCh37/rtg/GRCh37.sdf '
+'-b /home/vlad/bcbio/genomes/Hsapiens/GRCh37/validation/giab-NA12878-NA24385-somatic/truth_regions.bed '
+'/home/vlad/bcbio/genomes/Hsapiens/GRCh37/validation/giab-NA12878-NA24385-somatic/truth_small_variants.vcf.gz '

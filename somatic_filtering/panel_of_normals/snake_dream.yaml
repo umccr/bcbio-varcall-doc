@@ -1,0 +1,9 @@
+samples:
+    syn3-vardict: syn3-effects-annotated-sample.vcf.gz
+    syn3-ensemble: syn3-ensemble-sample.vcf.gz
+
+normals_dir: normals/*.vcf.gz
+
+truth:
+
+hits_threholds: 1, 2, 3

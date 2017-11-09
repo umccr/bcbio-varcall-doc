@@ -43,9 +43,9 @@ tabix -p vcf na12878_1vd_vs_2vd-vardict-annotated-pon.vcf.gz
 
 ### Filtering
 
-To filter out variants met at least twice in the panel:
+To filter out variants met at least 2 times in the panel:
 ```bash
-bcftools filter -i "INFO/PoN_CNT>1" na12878_1vd_vs_2vd-vardict-annotated-pon.vcf.gz -Oz -o na12878_1vd_vs_2vd-vardict-annotated-pon-n2.vcf.gz
+bcftools filter -i "INFO/PoN_CNT>=2" na12878_1vd_vs_2vd-vardict-annotated-pon.vcf.gz -Oz -o na12878_1vd_vs_2vd-vardict-annotated-pon-n2.vcf.gz
 ```
 
 ### Evaluation
@@ -82,21 +82,34 @@ The reduction of false positives is significant.
 
 Just for the demonstration, applying to original variant calls, sensititity drops significancatly because of the large amount of germline variants shared between these samples and the samples in the panel:
 ```
-1VD     1,007,291  1,948,935  704      34.07%  99.93%    97762  240731    614  28.88%  99.38%
-1VD n2  292,624    73,936     715,371  79.83%  29.03%    42172   87484  56204  32.53%  42.87%
-1VD n1  171,940    37,439     836,055  82.12%  17.06%    32507   84206  65869  27.85%  33.04%
+1VD          1,007,291  1,948,935  704      34.07%  99.93%    97762  240731    614  28.88%  99.38%
+1VD, 1 hit   292,624    73,936     715,371  79.83%  29.03%    42172   87484  56204  32.53%  42.87%
+1VD, 2 hits  171,940    37,439     836,055  82.12%  17.06%    32507   84206  65869  27.85%  33.04%
 ```
 
 ### NA12878/NA24385 somatic-like mixture
 
-In order to try an example more close to real tumor/normal experiment, we run a NA12878/NA24385 somatic-like mixture, and see sensitivity drops after applying the panel:
+In order to try an example closer to a real tumor/normal experiment, we use a NA12878/NA24385 somatic-like mixture, and see sensitivity drops after applying the panel.
 
-```                      SNP                                              INDEL
-                         TP   FP     FN         Precision  Sensitivity    TP   FP   FN      Precision  Sensitivity
-Original                 
-Filtered, 1 hit          
-Filtered, 2 hits         
+```                 SNP                                              
+                    TP   	  FP     FN         Precision  Sensitivity
+Original            928,991   257    79,004	    99.97%	   92.16% 
+Filtered, 1 hit     156,442   218    851,553	99.86%	   15.52%        
+Filtered, 2 hits    267,662   225    740,333	99.92%	   26.55%
+Filtered, 3 hits    376,027   229    631,968	99.94%	   37.30%
 ```
+
+Apparently it drops.
+
+
+
+
+
+
+
+
+
+
 
 
 
