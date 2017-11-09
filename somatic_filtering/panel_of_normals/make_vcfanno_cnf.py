@@ -11,17 +11,19 @@ VPH61_Blood-germline-ensemble-annotated.vcf.gz
 WPT-013-normal-ensemble-annotated.vcf.gz
 '''.split()
 
+
 def lbl_by_path(fp):
-	fname = os.path.basename(fp)
-	fname = fname.replace('-germline-ensemble-annotated.vcf.gz', '')
-	fname = fname.replace('-ensemble-annotated.vcf.gz', '')
-	fname = fname.replace('.vcf.gz', '')
-	fname = fname.replace('-', '_')
-	return 'PoN_' + fname
+    fname = os.path.basename(fp)
+    fname = fname.replace('-germline-ensemble-annotated.vcf.gz', '')
+    fname = fname.replace('-ensemble-annotated.vcf.gz', '')
+    fname = fname.replace('.vcf.gz', '')
+    fname = fname.replace('-', '_')
+    return 'PoN_' + fname
+
 
 for fp in fpaths:
-	print(f'''[[annotation]]
-file="../../normals/new/{fp}"
+    print(f'''[[annotation]]
+file="/home/vlad/validation/normals/{fp}"
 fields=[""]
 ops=["self"]
 names=["{lbl_by_path(fp)}"]
@@ -39,4 +41,3 @@ fields=[{', '.join('"' + lbl_by_path(fp) + '"' for fp in fpaths)}]
 op="delete"
 '''
 )
-
