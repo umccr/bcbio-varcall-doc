@@ -89,18 +89,15 @@ Just for the demonstration, applying to original variant calls, sensititity drop
 
 ### NA12878/NA24385 somatic-like mixture
 
-In order to try an example closer to a real tumor/normal experiment, we use a NA12878/NA24385 somatic-like mixture, and see sensitivity drops after applying the panel.
+In order to try an example closer to a real tumor/normal experiment, we use a NA12878/NA24385 somatic-like mixture, and see sensitivity drops after applying the panel (apparently it drops).
 
 ```                 SNP                                              
-                    TP   	  FP     FN         Precision  Sensitivity
-Original            928,991   257    79,004	    99.97%	   92.16% 
-Filtered, 1 hit     156,442   218    851,553	99.86%	   15.52%        
-Filtered, 2 hits    267,662   225    740,333	99.92%	   26.55%
-Filtered, 3 hits    376,027   229    631,968	99.94%	   37.30%
+                    TP        FP     FN         Precision    Sensitivity
+Original            928,991   257    79,004     99.97%       92.16% 
+Filtered, 1 hit     156,442   218    851,553    99.86%       15.52%        
+Filtered, 2 hits    267,662   225    740,333    99.92%       26.55%
+Filtered, 3 hits    376,027   229    631,968    99.94%       37.30%
 ```
-
-Apparently it drops.
-
 
 
 
