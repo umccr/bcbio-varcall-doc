@@ -4,3 +4,7 @@ samples:
     3VD: 3VD/na12878_3VD.vcf.gz
     4KC: 4KC/na12878_4KC.vcf.gz
     PG: PG/na12878_1.vcf.gz
+
+normals_dir: /home/vlad/validation/normals/*.vcf.gz
+
+hits_threholds: 1, 2

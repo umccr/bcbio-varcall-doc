@@ -80,15 +80,22 @@ Two NA12878 samples running as a T/N pair ideally should yeild zero somatic vari
 
 The reduction of false positives is significant.
 
+Just for the demonstration, applying to original variant calls, sensititity drops significancatly because of the large amount of germline variants shared between these samples and the samples in the panel:
+```
+1VD     1,007,291  1,948,935  704      34.07%  99.93%    97762  240731    614  28.88%  99.38%
+1VD n2  292,624    73,936     715,371  79.83%  29.03%    42172   87484  56204  32.53%  42.87%
+1VD n1  171,940    37,439     836,055  82.12%  17.06%    32507   84206  65869  27.85%  33.04%
+```
+
 ### NA12878/NA24385 somatic-like mixture
 
-Now trying a NA12878/NA24385 somatic-like mixture to see if we lose sensitivity by applying the panel:
+In order to try an example more close to real tumor/normal experiment, we run a NA12878/NA24385 somatic-like mixture, and see sensitivity drops after applying the panel:
 
 ```                      SNP                                              INDEL
                          TP   FP     FN         Precision  Sensitivity    TP   FP   FN      Precision  Sensitivity
-Original                 217  2,482  1,007,778  8.04%      0.02%          30   858  98,346  3.38%      0.03%
-Filtered, 1 hit          78   150    1,007,917  34.21%     0.01%          4    14   98,372  22.22%     0.00%
-Filtered, 2 hits         65   134    1,007,930  32.66%     0.01%          1    11   98,375  8.33%      0.00%
+Original                 
+Filtered, 1 hit          
+Filtered, 2 hits         
 ```
 
 

@@ -3,8 +3,6 @@ import glob
 
 configfile: 'snake_config.yaml'
 
-NORMALS = glob.glob('/home/vlad/validation/normals/*.vcf.gz')
-
 def str_to_lua_variable_name(fpath):
     name = os.path.basename(fpath)
     name = re.sub('[^0-9a-zA-Z_]', '_', name) # Remove invalid characters
@@ -31,15 +29,15 @@ op="delete"
 
 rule all:
     input:
-        expand('{sample}/{sample}-ann-n1.re.eval', sample=config['samples'])
+        expand('report_{ht}.tsv', ht=config['hits_threholds'])
 
 rule prep_vcfanno:
     input:
-        NORMALS
+        config['normals_dir']
     output:
         'normals/annotate_normals_vcfanno.toml'
     run:
-        fpaths=input
+        fpaths = glob.glob(join(config.normals_dir, '*.vcf.gz'))
         with open(output[0], 'w') as out:
             for fp in fpaths:
                 out.write(VCFANNO_ANNO.format(
@@ -52,7 +50,7 @@ rule prep_vcfanno:
 
 rule annotate:
     input:
-        lambda wildcards: config["samples"][wildcards.sample],
+        lambda wildcards: config['samples'][wildcards.sample],
         toml=rules.prep_vcfanno.output
     output:
         '{sample}/{sample}-ann.vcf.gz'
@@ -63,15 +61,15 @@ rule filter:
     input:
         rules.annotate.output
     output:
-        '{sample}/{sample}-ann-n1.vcf.gz'
+        '{sample}/{sample}-ann-n{ht}.vcf.gz'
     shell:
-        'bcftools filter -i "INFO/PoN_CNT>1" {input} -Oz -o {output}'
+        'bcftools filter -e "INFO/PoN_CNT>={ht}" {input} -Oz -o {output}'
 
 rule tabix:
     input:
         rules.filter.output
     output:
-        '{sample}/{sample}-ann-n1.vcf.gz.tbi'
+        '{sample}/{sample}-ann-n{ht}.vcf.gz.tbi'
     shell:
         'tabix -p vcf {input}'
 
@@ -80,7 +78,7 @@ rule eval:
         rules.filter.output,
         index=rules.tabix.output
     output:
-        '{sample}/{sample}-ann-n1.re.eval'
+        '{sample}/{sample}-ann-n{ht}.re.eval'
     shell:
         '/home/vlad/validation/rtgeval.kit/run-eval -s /home/vlad/bcbio/genomes/Hsapiens/GRCh37/rtg/GRCh37.sdf '
         '-b /home/vlad/bcbio/genomes/Hsapiens/GRCh37/validation/giab-NA12878-NA24385-somatic/truth_regions.bed '
@@ -89,9 +87,9 @@ rule eval:
 
 rule report:
     input:
-        rules.eval.output
+        expand(rules.eval.output, sample=config['samples'])
     output:
-        'report.tsv'
+        'report_{ht}.tsv'
     run:
         vals = []
         vals.append(['', 'SNP', '', '', 'INDEL', '', ''])
