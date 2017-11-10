@@ -1,5 +1,5 @@
 Small variant validation
-________________________
+========================
 
 This document summarizes tools and datasets that can be used for variant calling comparison with truth set and visualization.
 
