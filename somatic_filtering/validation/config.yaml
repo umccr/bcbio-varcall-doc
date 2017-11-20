@@ -1,0 +1,36 @@
+samples:
+    ensemble:        
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-ensemble-annotated.vcf.gz
+        vcf_sample: syn3-tumor
+    mutect:          
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-mutect2-annotated.vcf.gz
+        vcf_sample: syn3-tumor
+    vardict:
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-vardict-annotated.vcf.gz
+        vcf_sample: syn3-tumor
+    varscan:      
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-varscan-annotated.vcf.gz
+        vcf_sample: syn3-tumor
+    ensemble-single: 
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-ensemble-annotated.vcf.gz
+        vcf_sample: syn3-tumor-single
+    vardict-single:  
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-vardict-annotated.vcf.gz
+        vcf_sample: syn3-tumor-single
+    varscan-single:  
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-varscan-annotated.vcf.gz
+        vcf_sample: syn3-tumor-single
+
+regions:
+    /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/NGv3.bed
+
+# vcf_and_vcfsname_by_sample = {
+#     'ensemble':        ('/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-ensemble-annotated.vcf.gz', 'syn3-tumor'),
+#     'mutect':          ('/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-mutect2-annotated.vcf.gz', 'syn3-tumor'),
+#     'vardict':         ('/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-vardict-annotated.vcf.gz', 'syn3-tumor'),
+#     'varscan':         ('/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-varscan-annotated.vcf.gz', 'syn3-tumor'),
+#     'ensemble-single': ('/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-ensemble-annotated.vcf.gz', 'syn3-tumor-single'),
+#     'mutect-single':   ('/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-mutect2-annotated.vcf.gz', 'syn3-tumor-single'),
+#     'vardict-single':  ('/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-vardict-annotated.vcf.gz', 'syn3-tumor-single'),
+#     'varscan-single':  ('/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-varscan-annotated.vcf.gz', 'syn3-tumor-single'),
+# }
