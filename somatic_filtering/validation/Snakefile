@@ -1,3 +1,9 @@
+# Snakemake file for evaluation of a set of VCF files against a truth set. 
+# Handles multiallelic, normalization, inconsistent sample names.
+
+# Usage: 
+# snakemake -p --configfile=config.yaml
+
 import os
 import glob
 import re
@@ -6,11 +12,6 @@ import gzip
 import csv
 import pprint
 from collections import defaultdict
-
-""" 
-Usage: 
-$ snakemake -p --configfile=config.yaml
-"""
 
 # configfile: 'config.yaml'
 # shell.prefix("set -o pipefail; ")
