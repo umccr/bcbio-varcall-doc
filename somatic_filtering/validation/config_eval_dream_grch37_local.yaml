@@ -1,0 +1,28 @@
+samples:
+    ensemble:        
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-ensemble-annotated.vcf.gz
+        vcf_sample: syn3-tumor
+    mutect:          
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-mutect2-annotated.vcf.gz
+        vcf_sample: syn3-tumor
+    vardict:
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-vardict-annotated.vcf.gz
+        vcf_sample: syn3-tumor
+    varscan:      
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-varscan-annotated.vcf.gz
+        vcf_sample: syn3-tumor
+    ensemble-single: 
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-ensemble-annotated.vcf.gz
+        vcf_sample: syn3-tumor-single
+    vardict-single:  
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-vardict-annotated.vcf.gz
+        vcf_sample: syn3-tumor-single
+    varscan-single:  
+        vcf_file:   /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/syn3-tumor-single-varscan-annotated.vcf.gz
+        vcf_sample: syn3-tumor-single
+
+regions: /Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37/NGv3.bed
+
+truth_variants:  'GRCh37/validation/dream-syn3/truth_small_variants.vcf.gz'
+truth_regions:   'GRCh37/validation/dream-syn3/truth_regions.bed'
+reference_fasta: 'GRCh37/seq/GRCh37.fa'

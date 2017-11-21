@@ -1,0 +1,54 @@
+samples:
+    ensemble:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/MB_300vs50-ensemble-annotated.vcf.gz
+        vcf_sample: MB_tumor_300x
+    ensemble_n1:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/ensemle-ann-n1.vcf.gz
+        vcf_sample: MB_tumor_300x
+    ensemble_n2:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/ensemle-ann-n2.vcf.gz
+        vcf_sample: MB_tumor_300x
+    ensemble_n3:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/ensemle-ann-n3.vcf.gz
+        vcf_sample: MB_tumor_300x
+    mutect2:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/MB_300vs50-mutect2-annotated.vcf.gz
+        vcf_sample: MB_tumor_300x
+    mutect2_n1:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/mutect2-ann-n1.vcf.gz
+        vcf_sample: MB_tumor_300x
+    mutect2_n2:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/mutect2-ann-n2.vcf.gz
+        vcf_sample: MB_tumor_300x
+    mutect2_n3:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/mutect2-ann-n3.vcf.gz
+        vcf_sample: MB_tumor_300x
+    vardict:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/MB_300vs50-vardict-annotated.vcf.gz
+        vcf_sample: MB_tumor_300x
+    vardict_n1:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/vardict-ann-n1.vcf.gz
+        vcf_sample: MB_tumor_300x
+    vardict_n2:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/vardict-ann-n2.vcf.gz
+        vcf_sample: MB_tumor_300x
+    vardict_n3:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/vardict-ann-n3.vcf.gz
+        vcf_sample: MB_tumor_300x
+    varscan:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/MB_300vs50-varscan-annotated.vcf.gz
+        vcf_sample: MB_tumor_300x
+    varscan_n1:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/varscan-ann-n1.vcf.gz
+        vcf_sample: MB_tumor_300x
+    varscan_n2:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/varscan-ann-n2.vcf.gz
+        vcf_sample: MB_tumor_300x
+    varscan_n3:
+        vcf_file: /data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/final/2017-11-21_bcbio_decomposed/panel_of_normals/work/filter/varscan-ann-n3.vcf.gz
+        vcf_sample: MB_tumor_300x
+
+truth_variants:  '/data/cephfs/punim0010/data/External/Reference/ICGC_MB/MB-benchmark.vcf.gz'
+truth_regions: '/data/cephfs/punim0010/projects/Saveliev_ICGC_MB/bcbio_300_50/work/bedprep/MB_tumor_300x-variant_regions.quantized-vrsubset-callableblocks-merged.bed'
+reference_fasta: 'GRCh37/seq/GRCh37.fa'
+

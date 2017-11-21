@@ -7,19 +7,21 @@ import csv
 import pprint
 from collections import defaultdict
 
-configfile: 'config.yaml'
-shell.prefix("set -o pipefail; ")
+""" 
+Usage: 
+$ snakemake -p --configfile=config.yaml
+"""
+
+# configfile: 'config.yaml'
+# shell.prefix("set -o pipefail; ")
 
 hostname = socket.gethostname()
 if hostname == '5180L-135800-M.local':
-    truth_variants = '/Users/vsaveliev/genomes/Hsapiens/GRCh37/validation/dream-syn3/truth_small_variants.vcf.gz'
-    truth_regions = '/Users/vsaveliev/genomes/Hsapiens/GRCh37/validation/dream-syn3/truth_regions.bed'
-    reference_fasta = '/Users/vsaveliev/genomes/Hsapiens/GRCh37/seq/GRCh37.fa'
-
+    loc = 'local'
+    ref_loc = '/Users/vsaveliev/genomes/Hsapiens'
 elif re.match(r'spartan.*\.hpc\.unimelb\.edu\.au', hostname):
-    truth_variants = '/home/vlad/bcbio/genomes/Hsapiens/GRCh37/validation/dream-syn3/truth_small_variants.vcf.gz'
-    truth_regions = '/home/vlad/bcbio/genomes/Hsapiens/GRCh37/validation/dream-syn3/truth_regions.bed'
-    reference_fasta = '/home/vlad/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa'
+    loc = 'spartan'
+    ref_loc = '/home/vlad/bcbio/genomes/Hsapiens'
 
 # vcf_dir = '/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37'
 # fn_by_sample = {
@@ -38,7 +40,7 @@ rule all:
 
 rule prep_regions:
     input:
-        truth_regions = truth_regions
+        truth_regions = os.path.join(ref_loc, config['truth_regions'])
     output:
         'work/regions/regions.bed'
     run:
@@ -61,12 +63,12 @@ rule narrow_samples_to_target:  # Extracts target sample, target regions, and re
 
 rule narrow_truth_to_target:  # Extracts target regions from truth VCF
     input:
-        truth_variants,
+        truth_variants = os.path.join(ref_loc, config['truth_variants']),
         regions = rules.prep_regions.output
     output:
         'work/narrow/truth_variants.vcf.gz'
     shell:
-        'bcftools view {input[0]} -T {input.regions} -Oz -o {output[0]} && tabix -p vcf {output[0]}'
+        'bcftools view {input.truth_variants} -T {input.regions} -Oz -o {output[0]} && tabix -p vcf {output[0]}'
 
 # def decompose_and_normalize(vcf, output, reference_fasta=None):
     # return ("gunzip -c {vcf} | " +
@@ -77,6 +79,7 @@ rule narrow_truth_to_target:  # Extracts target regions from truth VCF
     #     "| sed -e 's/Number=A/Number=1/g' | bgzip -c > {output}").format(**locals())
 
 normalize = "bcftools norm -m '-' {input.vcf} -Oz -o {output[0]}"
+reference_fasta = os.path.join(ref_loc, config['reference_fasta'])
 if os.path.isfile(reference_fasta):
     normalize += ' -f ' + reference_fasta
 normalize += ' && tabix -p vcf {output[0]}'
@@ -163,18 +166,19 @@ rule eval:
 
 rule report:
     input:
-        stats_files = expand(rules.eval.output, sample=config['samples'].keys())
+        stats_files = expand(rules.eval.output, sample=sorted(config['samples'].keys()))
     output:
         'work/eval/report.tsv'
     params:
-        samples = config['samples']
+        samples = sorted(config['samples'].keys())
     run:
         out_lines = []
-        out_lines.append(['', 'SNP', ''  , ''  , ''         , ''      , 'INDEL', ''  , ''  , ''         , ''       ])
-        out_lines.append(['', 'TP' , 'FP', 'FN', 'Precision', 'Recall', 'TP'   , 'FP', 'FN', 'Precision', 'Recall',])
+        out_lines.append(['Sample', 'File', 'SNP', ''  , ''  , ''         , ''      , 'INDEL', ''  , ''  , ''         , ''       ])
+        out_lines.append([''      , ''    , 'TP' , 'FP', 'FN', 'Precision', 'Recall', 'TP'   , 'FP', 'FN', 'Precision', 'Recall',])
         for stats_file, sname in zip(input.stats_files, params.samples):
+            print(stats_file, sname)
             with open(stats_file) as f:
-                out_lines.append([sname] + f.readlines()[1].strip().split('\t'))
+                out_lines.append([sname, stats_file] + f.readlines()[1].strip().split('\t'))
 
         with open(output[0], 'w') as out_f:
             for fields in out_lines:
@@ -244,16 +248,6 @@ rule report:
 # bcftools_isec/0000.vcf.gz               FP    = 19     for records private to  ensemble.subsample.re.test.vcf.gz
 # bcftools_isec/0001.vcf.gz               FN    = 49     for records private to  ensemble.subsample.re.truth.vcf.gz
 # bcftools_isec/0002.vcf.gz               TP    = 347    for records from ensemble.subsample.re.test.vcf.gz shared by both       ensemble.subsample.re.test.vcf.gz ensemble.subsample.re.truth.vcf.gz
-
-# allelic SNP     FN      13 + 36 = 49
-# allelic SNP     FP      4 + 15 = 19
-# allelic SNP     %FNR    6.67
-# allelic SNP     %FDR    2.15
-# allelic INDEL   FN      
-# allelic INDEL   FP      
-# allelic INDEL   %FNR    17.91
-# allelic INDEL   %FDR    8.33
-
 
 
 # bcftools_isec/0000.vcf.gz               FP    = 71     for records private to  ensemble.subsample.re.test.vcf.gz
