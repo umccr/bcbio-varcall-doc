@@ -24,13 +24,6 @@ elif re.match(r'spartan.*\.hpc\.unimelb\.edu\.au', hostname):
     loc = 'spartan'
     ref_loc = '/home/vlad/bcbio/genomes/Hsapiens'
 
-# vcf_dir = '/Users/vsaveliev/Analysis/snv_validation/dream_syn3_grch37'
-# fn_by_sample = {
-#     re.sub('.vcf.gz$', '', fn.replace('-annotated', '')): os.path.join(vcf_dir, fn) 
-#     for fn in glob_wildcards(join(vcf_dir, '*.vcf.gz'))
-# }
-# sample_name = 'syn3-tumor'
-
 rule all:
     input:
         'work/eval/report.tsv'
@@ -71,19 +64,13 @@ rule narrow_truth_to_target:  # Extracts target regions from truth VCF
     shell:
         'bcftools view {input.truth_variants} -T {input.regions} -Oz -o {output[0]} && tabix -p vcf {output[0]}'
 
-# def decompose_and_normalize(vcf, output, reference_fasta=None):
-    # return ("gunzip -c {vcf} | " +
-    #     "sed 's/ID=AD,Number=./ID=AD,Number=R/' | " +
-    #     "vt decompose -s - " +
-    #     "| vt normalize -n -r {reference_fasta} - " +
-    #     "| awk '{{ gsub(\"./-65\", \"./.\"); print $0 }}'" +
-    #     "| sed -e 's/Number=A/Number=1/g' | bgzip -c > {output}").format(**locals())
-
-normalize = "bcftools norm -m '-' {input.vcf} -Oz -o {output[0]}"
-reference_fasta = os.path.join(ref_loc, config['reference_fasta'])
-if os.path.isfile(reference_fasta):
-    normalize += ' -f ' + reference_fasta
-normalize += ' && tabix -p vcf {output[0]}'
+def normalize_cmd():
+    normalize = "bcftools norm -m '-' {input.vcf} -Oz -o {output[0]}"
+    reference_fasta = os.path.join(ref_loc, config['reference_fasta'])
+    if os.path.isfile(reference_fasta):
+        normalize += ' -f ' + reference_fasta
+    normalize += ' && tabix -p vcf {output[0]}'
+    return normalize
 
 rule normalize_sample:
     input:
@@ -91,7 +78,7 @@ rule normalize_sample:
     output:
         'work/normalize/{sample}/{sample}.vcf.gz'
     shell:
-        normalize
+        normalize_cmd()
 
 rule normalize_truth:
     input:
@@ -99,7 +86,7 @@ rule normalize_truth:
     output:
         'work/normalize/truth_variants.vcf.gz'
     shell:
-        normalize
+        normalize_cmd()
 
 rule bcftools_isec:
     input:
@@ -150,21 +137,6 @@ rule eval:
                 tp_inds, fp_inds, fn_inds, tp_inds / (tp_inds + fp_inds), tp_inds / (tp_inds + fn_inds)
             ])
 
-# rule eval:
-#     input:
-#         rules.index_samples.output,
-#         rules.index_truth.output,
-#         regions = rules.prep_target.output,
-#         truth_vcf = rules.narrow_truth_to_target.output, 
-#         sample_vcf = rules.narrow_samples_to_target.output
-#     output:
-#         '{sample}/{sample}.re.a/weighted_roc.tsv.gz'
-#     shell:
-#         '{rtgeval}/run-eval -s {sdf}'
-#         ' -b {input.regions}'
-#         ' {input.truth_vcf}'
-#         ' {input.sample_vcf}'
-
 rule report:
     input:
         stats_files = expand(rules.eval.output, sample=sorted(config['samples'].keys()))
@@ -185,6 +157,21 @@ rule report:
             for fields in out_lines:
                 print(fields)
                 out_f.write('\t'.join(map(str, fields)) + '\n')
+
+# rule eval:
+#     input:
+#         rules.index_samples.output,
+#         rules.index_truth.output,
+#         regions = rules.prep_target.output,
+#         truth_vcf = rules.narrow_truth_to_target.output, 
+#         sample_vcf = rules.narrow_samples_to_target.output
+#     output:
+#         '{sample}/{sample}.re.a/weighted_roc.tsv.gz'
+#     shell:
+#         '{rtgeval}/run-eval -s {sdf}'
+#         ' -b {input.regions}'
+#         ' {input.truth_vcf}'
+#         ' {input.sample_vcf}'
 
 # rule count_truth:
 #     input:
@@ -252,15 +239,4 @@ rule report:
 
 
 # bcftools_isec/0000.vcf.gz               FP    = 71     for records private to  ensemble.subsample.re.test.vcf.gz
-
-
-
-
-
-
-
-
-
-
-
 
