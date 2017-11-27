@@ -2,6 +2,7 @@ The commands run by bcbio when using `VarDict` as the variant caller can be
 found in the `bcbio-nextgen-commands.log` log file. In summary:
 
 <!-- vim-markdown-toc GFM -->
+
 * [vardict-java](#vardict-java)
 * [testsomatic](#testsomatic)
 * [var2vcf](#var2vcf)
