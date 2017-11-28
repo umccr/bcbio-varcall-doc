@@ -28,7 +28,6 @@ VPH56_Blood
 VPH58_Blood
 VPH59_Blood
 VPH61_Blood
-WPT-013
 ```
 
 ### Annotating

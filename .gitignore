@@ -12,4 +12,7 @@ scripts/bcbio/2017-09-25_cancer-normal/work/*
 !scripts/bcbio/2017-09-25_cancer-normal/work/run_bcbio.sh
 final/
 
+__pycache__
 .DS_Store
+.idea
+somatic_filtering/panel_of_normals/hg38ToHg19.over.chain.gz

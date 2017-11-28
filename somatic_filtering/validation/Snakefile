@@ -12,17 +12,12 @@ import gzip
 import csv
 import pprint
 from collections import defaultdict
+from validation_libs import get_ref_path, get_sample_name
 
-# configfile: 'config.yaml'
+configfile: 'config.yaml'
 # shell.prefix("set -o pipefail; ")
 
-hostname = socket.gethostname()
-if hostname == '5180L-135800-M.local':
-    loc = 'local'
-    ref_loc = '/Users/vsaveliev/genomes/Hsapiens'
-elif re.match(r'spartan.*\.hpc\.unimelb\.edu\.au', hostname):
-    loc = 'spartan'
-    ref_loc = '/home/vlad/bcbio/genomes/Hsapiens'
+ref_loc = get_ref_path()
 
 rule all:
     input:
@@ -30,45 +25,74 @@ rule all:
     output:
         'report.tsv'
     shell:
-        'ln -sr {input} {output}'
+        'ln -s {input} {output}'
 
-rule prep_regions:
-    input:
-        truth_regions = os.path.join(ref_loc, config['truth_regions'])
-    output:
-        'work/regions/regions.bed'
-    run:
-        samples_regions = config.get('regions')
-        if samples_regions:
-            shell('bedops -i {input.truth_regions} {samples_regions} > {output}')
-        else:
-            shell('ln -sr {input.truth_regions} {output}')
+
+def merge_regions():
+    samples_regions = config.get('regions')
+    truth_regions = os.path.join(ref_loc, config['truth_regions']) if 'truth_regions' in config else None
+
+    output = 'work/regions/regions.bed'
+    if samples_regions and truth_regions:
+        shell('bedops -i <(sort-bed {truth_regions}) <(sort-bed {samples_regions}) > {output}')
+        return output
+    elif truth_regions:
+        shell('sort-bed {truth_regions} > {output}')
+        return output
+    elif samples_regions:
+        shell('sort-bed {samples_regions} > {output}')
+        return output
+    else:
+        return None
+
+# def get_regions_input(_):
+#     ret = [f for f in (truth_regions, samples_regions) if f]
+#     print("ret: " + str(ret))
+#     return ret
+
+# rule prep_regions:
+#     input:
+#         get_regions_input
+#     output:
+#         'work/regions/regions.bed'
+#     run:
+#         if samples_regions and truth_regions:
+#             shell('bedops -i <(sort-bed {truth_regions}) <(sort-bed {samples_regions}) > {output}')
+#         elif truth_regions:
+#             shell('sort-bed {truth_regions} > {output}')
+#         elif samples_regions:
+#             shell('sort-bed {samples_regions} > {output}')
 
 rule narrow_samples_to_target:  # Extracts target sample, target regions, and remove rejected calls from the input VCF 
     input:
-        lambda wildcards: config['samples'][wildcards.sample]['vcf_file'],
-        regions = rules.prep_regions.output
+        lambda wildcards: config['samples'][wildcards.sample]
+        # regions = rules.prep_regions.output[0] if (samples_regions or truth_regions) else []
     output:
         'work/narrow/{sample}.vcf.gz'
-    params:
-        vcf_sample = lambda wildcards: config['samples'][wildcards.sample]['vcf_sample']
-    shell:
-        'bcftools view -s {params.vcf_sample} {input[0]} -T {input.regions} -f .,PASS -Oz -o {output[0]} && tabix -p vcf {output[0]}'
+    run:
+        regions = merge_regions()
+        regions = ('-R ' + regions) if regions else ''
+        sn = get_sample_name(input[0])
+        assert sn
+        shell('bcftools view -s {sn} {input[0]} {regions} -f .,PASS -Oz -o {output[0]} && tabix -p vcf {output[0]}')
 
 rule narrow_truth_to_target:  # Extracts target regions from truth VCF
     input:
         truth_variants = os.path.join(ref_loc, config['truth_variants']),
-        regions = rules.prep_regions.output
+        # regions = rules.prep_regions.output[0] if (samples_regions or truth_regions) else []
     output:
         'work/narrow/truth_variants.vcf.gz'
-    shell:
-        'bcftools view {input.truth_variants} -T {input.regions} -Oz -o {output[0]} && tabix -p vcf {output[0]}'
+    run:
+        regions = merge_regions()
+        regions = ('-R ' + regions) if regions else ''
+        shell('bcftools view {input.truth_variants} {regions} -Oz -o {output[0]} && tabix -p vcf {output[0]}')
 
 def normalize_cmd():
-    normalize = "bcftools norm -m '-' {input.vcf} -Oz -o {output[0]}"
+    normalize = "bcftools norm -m '-' {input.vcf} -Ov"
     reference_fasta = os.path.join(ref_loc, config['reference_fasta'])
     if os.path.isfile(reference_fasta):
         normalize += ' -f ' + reference_fasta
+    normalize += ' | vcfallelicprimitives -t DECOMPOSED --keep-geno | vcfstreamsort | bgzip -c > {output[0]}'
     normalize += ' && tabix -p vcf {output[0]}'
     return normalize
 
@@ -92,15 +116,17 @@ rule bcftools_isec:
     input:
         sample_vcf = rules.normalize_sample.output,
         truth_vcf = rules.normalize_truth.output,
-        regions = rules.prep_regions.output
+        # regions = rules.prep_regions.output
     params:
         output_dir = 'work/eval/{sample}_bcftools_isec'
     output:
         fp = 'work/eval/{sample}_bcftools_isec/0000.vcf',
         fn = 'work/eval/{sample}_bcftools_isec/0001.vcf',
         tp = 'work/eval/{sample}_bcftools_isec/0002.vcf'
-    shell:
-        'bcftools isec {input.sample_vcf} {input.truth_vcf} -T {input.regions} -p {params.output_dir}'
+    run:
+        regions = merge_regions()
+        regions = ('-R ' + regions) if regions else ''
+        shell('bcftools isec {input.sample_vcf} {input.truth_vcf} {regions} -p {params.output_dir}')
 
 def count_variants(vcf):
     snps = 0
@@ -239,4 +265,5 @@ rule report:
 
 
 # bcftools_isec/0000.vcf.gz               FP    = 71     for records private to  ensemble.subsample.re.test.vcf.gz
+
 
