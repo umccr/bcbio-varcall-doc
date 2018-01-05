@@ -9,6 +9,8 @@ Summarising Somatic Variant Caller Filters
     * [`bcftools`](#bcftools)
     * [`depth-freq-filter`](#depth-freq-filter)
     * [`freebayes-call-somatic`](#freebayes-call-somatic)
+* [FreeBayes Filters](#freebayes-filters)
+    * [`freebayes-call-somatic`](#freebayes-call-somatic-1)
 
 <!-- vim-markdown-toc -->
 
@@ -62,7 +64,7 @@ VarDict-java Filters
 
 * Max p-value for somatic evidence (`-P 0.9`)
 * Max mean mismatches allowed (`-m 4.25`)
-* Min allele frequency (`-f 0.1`)
+* Min allele frequency (`-f 0.1`) (also in `VarDict-java`)
 * Output only candidate somatic variants (`-M`)
 * Min total depth (`-d 5`)
 * Min variant depth (`-v 3`)
@@ -98,3 +100,42 @@ true:
   normal based on a threshold. If there is supporting evidence, adds 'SOMATIC'
   to the INFO column. Else, adds 'REJECT' to the FILTER column.
 
+FreeBayes Filters
+-----------------
+
+Only one default filter changed in bcbio command line:
+
+* Min alternate fraction (`--min-alternate-fraction 0.1`)
+    - require at least 10% of observations supporting an alternate allele
+      within a single individual in order to evaluate the position.
+
+Next are all default:
+
+* Min alternate count (`--min-alternate-count 2`)
+    - require at least 2 observations supporting an alternate allele
+      within a single individual in order to evaluate the position.
+* Read duplicate: exclude duplicates marked as such in alignments
+* Min Read Mapping Quality (`-m 1`)
+    - exclude reads from analysis if the have mapping quality < m
+* Min Base Quality (`-q 0`)
+    - exclude alleles from analysis if their supporting base quality
+      is < q
+
+### `freebayes-call-somatic`
+
+Unsure about this:
+
+  Function in [bcbio-nextgen](https://github.com/chapmanb/bcbio-nextgen/blob/master/bcbio/variation/freebayes.py)
+    * Call SOMATIC variants from tumor/normal calls, adding REJECT filters and SOMATIC flag.
+    * Works from stdin and writes to stdout, finding positions of tumor and normal samples.
+    * Extracts the genotype likelihoods (GLs) from FreeBayes, which are like phred scores
+      except not multiplied by 10.
+        * for tumors, we retrieve the best likelihood to not be reference (the first GL)
+        * for normal, the best likelhood to be reference.
+    * After calculating the likelihoods, we compare these to thresholds to pass variants
+      at tuned sensitivity/precision. Tuning done on DREAM synthetic 3 dataset evaluations.
+    * We also check that the frequency of the tumor exceeds the frequency of the normal by
+      a threshold to avoid calls that are low frequency in both tumor and normal. This supports
+      both FreeBayes and VarDict output frequencies.
+
+bcbio has several steps after this, mostly cleaning up fields and normalising/removing dup variants with `vt`.
