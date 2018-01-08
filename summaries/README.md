@@ -11,6 +11,7 @@ Summarising Somatic Variant Caller Filters
     * [`freebayes-call-somatic`](#freebayes-call-somatic)
 * [FreeBayes Filters](#freebayes-filters)
     * [`freebayes-call-somatic`](#freebayes-call-somatic-1)
+* [MuTect2 Filters](#mutect2-filters)
 
 <!-- vim-markdown-toc -->
 
@@ -140,3 +141,80 @@ Function in [bcbio-nextgen](https://github.com/chapmanb/bcbio-nextgen/blob/maste
   both FreeBayes and VarDict output frequencies.
 
 bcbio has several steps after this, mostly cleaning up fields and normalising/removing dup variants with `vt`.
+
+
+MuTect2 Filters
+---------------
+
+* `tumor_lod`: minimum likelihood of an allele as determined by the somatic
+  likelihoods model required to pass. `TUMOR_LOD_THRESHOLD = 5.3`.
+    * LOD threshold for calling tumor variant. Only variants with tumor LODs
+      exceeding the threshold can pass filtering
+* `maxEventsInHaplotype`: the maximum allowable number of called variants
+  co-occurring in a single assembly region. If the number of called variants
+  exceeds this they will all be filtered. Note that this filter is misnamed
+  because it counts the total number of events over all haplotypes in an
+  assembly region. `maxEventsInHaplotype = 2`.
+    * Variants coming from a haplotype with more than this many events are filtered
+* `uniqueAltReadCount`: the minimum number of unique (start position, fragment
+  length) pairs required to make a call. This count is a proxy for the number
+  of unique molecules (as opposed to PCR duplicates) supporting an allele.
+  Normally PCR duplicates are marked and filtered by the GATK engine, but in
+  UMI-aware calling this may not be the case, hence the need for this filter.
+  `uniqueAltReadCount = 0`.
+    * Filter a variant if a site contains fewer than this many unique
+      (i.e. deduplicated) reads supporting the alternate allele
+* `maxAltAllelesThreshold`: the maximum allowable number of alt alleles at a
+  site. By default only biallelic variants pass the filter. `numAltAllelesThreshold = 1`
+    * Filter variants with too many alt alleles.
+* `max_germline_posterior`: the maximum posterior probability, as determined by
+  the above germline probability model, that a variant is a germline event.
+  `maxGermlinePosterior = 0.025`.
+    * Maximum posterior probability that an allele is a germline variant.
+      The default value of this argument was chosen to achieve roughly one false
+      positive per covered megabase according to a back-of-the-envelope
+      calculation assuming the neutral model of allele selection, with
+      parameters estimated from ExAC.
+* `normal_artifact_lod`: the maximum acceptable likelihood of an allele in the
+  normal _by the somatic likelihoods model_. This is different from the normal
+  likelihood that goes into the germline model, which makes a diploid assumption.
+  Here we compute the normal likelihood as if it were a tumor in order to detect
+  artifacts. `NORMAL_ARTIFACT_LOD_THRESHOLD = 0.0`.
+    * LOD threshold for calling normal artifacts. Measure of the minimum
+      evidence to support that a variant observed in the tumor is not
+      also present in the normal as an artifact i.e. not as a germline event.
+* `strandArtifactPosteriorProbability`: the posterior probability of a strand
+  artifact, as determined by the model described above, required to apply the
+  strand artifact filter. This is necessary but not sufficient - we also
+  require the estimated max a posteriori allele fraction to be less than
+  `strandArtifactAlleleFraction`. The second condition prevents filtering
+  real variants that also have significant strand bias, i.e. a true
+  variant that _also_ has some artifactual reads. `STRAND_ARTIFACT_POSTERIOR_PROB_THRESHOLD = 0.99`.
+    * Filter a variant if the probability of strand artifact exceeds this
+      number.
+* `strandArtifactAlleleFraction`: `STRAND_ARTIFACT_ALLELE_FRACTION_THRESHOLD = 0.01`.
+    * Filter a variant if the MAP estimate of allele fraction given artifact is
+      below this number.
+* `minMedianBaseQuality`: the minimum median base quality of bases supporting a SNV.
+  `minMedianBaseQuality = 20`.
+    * Filter variants for which the median base quality of alt reads is too
+      low.
+* `minMedianMappingQuality`: the minimum median mapping quality of reads supporting an allele.
+  `minMedianMappingQuality = 30`.
+    * Filter variants for which the median mapping quality of alt reads is too
+      low.
+* `maxMedianFragmentLengthDifference`: the maximum difference between the median fragment
+  lengths reads supporting alt and reference alleles. Note that fragment
+  length is based on where paired reads are mapped, not the actual physical fragment length.
+  `maxMedianFragmentLengthDifference = 10000`.
+    * Filter variants for which the median fragment length for alt reads is very
+      different from the median for ref reads.
+* `minMedianReadPosition`: the minimum median length of bases supporting an
+  allele from the closest end of the read. Indels positions are measured by
+  the end farthest from the end of the read. `minMedianReadPosition = 5`.
+    * Filter variants for which the median position of alt alleles within reads
+      is too near the end of reads.
+* `contaminationTable`: if `FilterMutectCalls` is passed a `contaminationTable`
+  from `CalculateContamination` it will filter alleles with allele fraction less
+  than the whole-bam contamination in the table. `contaminationTable = null`.
+    * Table containing contamination information.
